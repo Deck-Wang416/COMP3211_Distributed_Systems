@@ -1,6 +1,7 @@
 import pymssql
 import random
 import datetime
+import matplotlib.pyplot as plt
 
 # 数据库连接配置
 server = 'deck-server.database.windows.net'
@@ -51,6 +52,43 @@ try:
 
     # 调用函数生成并存储数据
     generate_sensor_data()
+
+    # 查询传感器的所有数据
+    cursor.execute("SELECT sensor_id, temperature, wind_speed, humidity, co2_level FROM sensor_data")
+    data = cursor.fetchall()
+
+    # 准备数据用于可视化
+    sensor_ids = [row[0] for row in data]
+    temperatures = [row[1] for row in data]
+    wind_speeds = [row[2] for row in data]
+    humidities = [row[3] for row in data]
+    co2_levels = [row[4] for row in data]
+
+    # 创建图表：温度和湿度折线图
+    plt.figure(figsize=(10, 5))
+    plt.subplot(1, 2, 1)
+    plt.plot(sensor_ids, temperatures, marker='o', label='Temperature (°C)', color='r')
+    plt.plot(sensor_ids, humidities, marker='x', label='Humidity (%)', color='b')
+    plt.xlabel('Sensor ID')
+    plt.ylabel('Value')
+    plt.title('Temperature and Humidity')
+    plt.legend()
+    plt.grid(True)
+
+    # 创建图表：风速和 CO2 浓度折线图
+    plt.subplot(1, 2, 2)
+    plt.plot(sensor_ids, wind_speeds, marker='s', label='Wind Speed (mph)', color='g')
+    plt.plot(sensor_ids, co2_levels, marker='d', label='CO2 Level (ppm)', color='m')
+    plt.xlabel('Sensor ID')
+    plt.ylabel('Value')
+    plt.title('Wind Speed and CO2 Level')
+    plt.legend()
+    plt.grid(True)
+
+    # 保存图表为 PNG 文件
+    plt.tight_layout()
+    plt.savefig('/tmp/chart.png')  # 更改保存路径
+    print("图表已保存为 /tmp/chart.png")
 
 except pymssql.OperationalError as e:
     print(f"数据库连接失败: {e}")
