@@ -1,3 +1,4 @@
+import time
 import pymssql
 import random
 import datetime
@@ -9,13 +10,19 @@ user = 'deck_wang'
 password = '20030416Wyf.'
 database = 'distributed_systems_deck'
 
-try:
-    # 连接到 Azure SQL
-    conn = pymssql.connect(server=server, user=user, password=password, database=database)
-    cursor = conn.cursor()
-    print("成功连接到数据库！")
+def connect_to_database():
+    """连接到 Azure SQL 数据库。"""
+    try:
+        conn = pymssql.connect(server=server, user=user, password=password, database=database)
+        cursor = conn.cursor()
+        print("成功连接到数据库！")
+        return conn, cursor
+    except pymssql.OperationalError as e:
+        print(f"数据库连接失败: {e}")
+        return None, None
 
-    # 创建表（如果不存在）
+def create_table(cursor):
+    """创建表（如果不存在）。"""
     cursor.execute("""
     IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='sensor_data' AND xtype='U')
     CREATE TABLE sensor_data (
@@ -28,43 +35,36 @@ try:
         timestamp DATETIME
     )
     """)
-    conn.commit()
     print("数据库表已准备好。")
 
-    # 生成并插入模拟传感器数据
-    def generate_sensor_data():
-        for i in range(20):
-            sensor_id = i + 1  # 传感器ID从1到20
-            temperature = round(random.uniform(8, 15), 2)  # 温度范围8-15°C
-            wind_speed = round(random.uniform(15, 25), 2)  # 风速范围15-25 mph
-            humidity = round(random.uniform(40, 70), 2)  # 湿度范围40%-70%
-            co2_level = random.randint(500, 1500)  # CO2浓度范围500-1500 ppm
-            timestamp = datetime.datetime.now()  # 当前时间
+def generate_sensor_data(cursor):
+    """生成并插入模拟传感器数据。"""
+    for i in range(20):
+        sensor_id = i + 1
+        temperature = round(random.uniform(8, 15), 2)
+        wind_speed = round(random.uniform(15, 25), 2)
+        humidity = round(random.uniform(40, 70), 2)
+        co2_level = random.randint(500, 1500)
+        timestamp = datetime.datetime.now()
 
-            # 插入数据到数据库 (使用 %s 作为占位符)
-            cursor.execute(
-                "INSERT INTO sensor_data (sensor_id, temperature, wind_speed, humidity, co2_level, timestamp) "
-                "VALUES (%s, %s, %s, %s, %s, %s)",
-                (sensor_id, temperature, wind_speed, humidity, co2_level, timestamp)
-            )
-        conn.commit()  # 提交事务
-        print("传感器数据已成功插入。")
+        cursor.execute(
+            "INSERT INTO sensor_data (sensor_id, temperature, wind_speed, humidity, co2_level, timestamp) "
+            "VALUES (%s, %s, %s, %s, %s, %s)",
+            (sensor_id, temperature, wind_speed, humidity, co2_level, timestamp)
+        )
+    print("传感器数据已成功插入。")
 
-    # 调用函数生成并存储数据
-    generate_sensor_data()
-
-    # 查询传感器的所有数据
+def visualize_data(cursor):
+    """查询数据并生成图表。"""
     cursor.execute("SELECT sensor_id, temperature, wind_speed, humidity, co2_level FROM sensor_data")
     data = cursor.fetchall()
 
-    # 准备数据用于可视化
     sensor_ids = [row[0] for row in data]
     temperatures = [row[1] for row in data]
     wind_speeds = [row[2] for row in data]
     humidities = [row[3] for row in data]
     co2_levels = [row[4] for row in data]
 
-    # 创建图表：温度和湿度折线图
     plt.figure(figsize=(10, 5))
     plt.subplot(1, 2, 1)
     plt.plot(sensor_ids, temperatures, marker='o', label='Temperature (°C)', color='r')
@@ -75,7 +75,6 @@ try:
     plt.legend()
     plt.grid(True)
 
-    # 创建图表：风速和 CO2 浓度折线图
     plt.subplot(1, 2, 2)
     plt.plot(sensor_ids, wind_speeds, marker='s', label='Wind Speed (mph)', color='g')
     plt.plot(sensor_ids, co2_levels, marker='d', label='CO2 Level (ppm)', color='m')
@@ -85,16 +84,30 @@ try:
     plt.legend()
     plt.grid(True)
 
-    # 保存图表为 PNG 文件
     plt.tight_layout()
-    plt.savefig('/tmp/chart.png')  # 更改保存路径
+    plt.savefig('/tmp/chart.png')
     print("图表已保存为 /tmp/chart.png")
 
-except pymssql.OperationalError as e:
-    print(f"数据库连接失败: {e}")
+def main():
+    """主程序，定时采集数据。"""
+    conn, cursor = connect_to_database()
+    if conn and cursor:
+        create_table(cursor)
 
-finally:
-    # 关闭数据库连接
-    if 'conn' in locals() and conn:
-        conn.close()
-        print("数据库连接已关闭。")
+        try:
+            while True:
+                generate_sensor_data(cursor)
+                conn.commit()
+                print("等待 5 秒后再次插入数据...")
+                time.sleep(5)  # 每隔 5 秒运行一次
+
+        except KeyboardInterrupt:
+            print("手动停止数据采集。")
+
+        finally:
+            visualize_data(cursor)
+            conn.close()
+            print("数据库连接已关闭。")
+
+if __name__ == "__main__":
+    main()

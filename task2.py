@@ -6,13 +6,19 @@ user = 'deck_wang'
 password = '20030416Wyf.'
 database = 'distributed_systems_deck'
 
-try:
-    # 连接到 Azure SQL
-    conn = pymssql.connect(server=server, user=user, password=password, database=database)
-    cursor = conn.cursor()
-    print("成功连接到数据库！")
+def connect_to_database():
+    """连接到 Azure SQL 数据库。"""
+    try:
+        conn = pymssql.connect(server=server, user=user, password=password, database=database)
+        cursor = conn.cursor()
+        print("成功连接到数据库！")
+        return conn, cursor
+    except pymssql.OperationalError as e:
+        print(f"数据库连接失败: {e}")
+        return None, None
 
-    # 查询每个传感器的最大值、最小值和平均值
+def calculate_statistics(cursor):
+    """计算每个传感器的最大值、最小值和平均值。"""
     query = """
     SELECT 
         sensor_id, 
@@ -35,7 +41,6 @@ try:
     cursor.execute(query)
     results = cursor.fetchall()
 
-    # 输出统计结果
     print("传感器数据统计：")
     for row in results:
         print(f"Sensor ID: {row[0]}")
@@ -45,11 +50,13 @@ try:
         print(f"  CO2 Level   - Min: {row[10]}, Max: {row[11]}, Avg: {row[12]:.2f}")
         print("-" * 30)
 
-except pymssql.OperationalError as e:
-    print(f"数据库连接失败: {e}")
-
-finally:
-    # 关闭数据库连接
-    if 'conn' in locals() and conn:
+def main():
+    """主程序：计算传感器数据的统计信息。"""
+    conn, cursor = connect_to_database()
+    if conn and cursor:
+        calculate_statistics(cursor)
         conn.close()
         print("数据库连接已关闭。")
+
+if __name__ == "__main__":
+    main()
