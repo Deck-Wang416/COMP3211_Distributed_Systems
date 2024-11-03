@@ -10,8 +10,10 @@ user = 'deck_wang'
 password = '20030416Wyf.'
 database = 'distributed_systems_deck'
 
+
 def main(mytimer: TimerRequest) -> None:
-    utc_timestamp = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).isoformat()
+    utc_timestamp = datetime.datetime.utcnow().replace(
+        tzinfo=datetime.timezone.utc).isoformat()
 
     if mytimer.past_due:
         logging.info('The timer is past due!')
@@ -20,7 +22,8 @@ def main(mytimer: TimerRequest) -> None:
 
     try:
         # Connect to Azure SQL Database
-        conn = pymssql.connect(server=server, user=user, password=password, database=database)
+        conn = pymssql.connect(server=server, user=user,
+                               password=password, database=database)
         cursor = conn.cursor()
         logging.info("Connected to the database successfully!")
 
@@ -43,10 +46,14 @@ def main(mytimer: TimerRequest) -> None:
         # Generate and insert simulated sensor data
         for i in range(20):
             sensor_id = i + 1  # Sensor ID from 1 to 20
-            temperature = round(random.uniform(8, 15), 2)  # Temperature range 8-15°C
-            wind_speed = round(random.uniform(15, 25), 2)  # Wind speed range 15-25 mph
-            humidity = round(random.uniform(40, 70), 2)  # Humidity range 40%-70%
-            co2_level = random.randint(500, 1500)  # CO2 concentration range 500-1500 ppm
+            # Temperature range 8-15°C
+            temperature = round(random.uniform(8, 15), 2)
+            # Wind speed range 15-25 mph
+            wind_speed = round(random.uniform(15, 25), 2)
+            humidity = round(random.uniform(40, 70),
+                             2)  # Humidity range 40%-70%
+            # CO2 concentration range 500-1500 ppm
+            co2_level = random.randint(500, 1500)
             timestamp = datetime.datetime.now()  # Current time
 
             # Insert data into the database

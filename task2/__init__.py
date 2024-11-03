@@ -7,11 +7,13 @@ user = 'deck_wang'
 password = '20030416Wyf.'
 database = 'distributed_systems_deck'
 
+
 def main(input: str) -> None:
     logging.info(f"Received data: {input}")
     try:
         # Connect to Azure SQL Database
-        conn = pymssql.connect(server=server, user=user, password=password, database=database)
+        conn = pymssql.connect(server=server, user=user,
+                               password=password, database=database)
         cursor = conn.cursor()
         logging.info("Connected to the database successfully!")
 
@@ -46,7 +48,8 @@ def main(input: str) -> None:
                 f"CO2 Level - Min: {row[10]}, Max: {row[11]}, Avg: {round(row[12], 2)}"
             )
 
-        logging.info("Sensor data statistics have been successfully retrieved and logged.")
+        logging.info(
+            "Sensor data statistics have been successfully retrieved and logged.")
 
     except pymssql.OperationalError as e:
         logging.error(f"Database connection failed: {e}")
