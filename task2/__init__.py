@@ -1,7 +1,5 @@
 import pymssql
 import logging
-import json
-from azure.functions import SqlRow
 
 # Database connection configuration
 server = 'deck-server.database.windows.net'
@@ -9,9 +7,8 @@ user = 'deck_wang'
 password = '20030416Wyf.'
 database = 'distributed_systems_deck'
 
-def main(inputDocument: SqlRow) -> None:
-    logging.info('SQL Trigger function received data change.')
-
+def main(input: str) -> None:
+    logging.info(f"Received data: {input}")
     try:
         # Connect to Azure SQL Database
         conn = pymssql.connect(server=server, user=user, password=password, database=database)
@@ -37,11 +34,9 @@ def main(inputDocument: SqlRow) -> None:
         FROM sensor_data
         GROUP BY sensor_id;
         """
-
         cursor.execute(query)
         results = cursor.fetchall()
 
-        # Formatting the output for logging
         for row in results:
             logging.info(
                 f"Sensor ID: {row[0]}, "
@@ -57,7 +52,6 @@ def main(inputDocument: SqlRow) -> None:
         logging.error(f"Database connection failed: {e}")
 
     finally:
-        # Close the database connection
         if 'conn' in locals() and conn:
             conn.close()
             logging.info("Database connection has been closed.")
