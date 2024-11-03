@@ -5,7 +5,7 @@
       "type": "sqlTrigger",
       "direction": "in",
       "name": "input",
-      "connectionStringSetting": "SQL_CONNECTION_STRING",
+      "connectionStringSetting": "sql_connection",
       "tableName": "sensor_data"
     }
   ]
