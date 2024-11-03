@@ -41,36 +41,17 @@ def main(inputDocument: SqlRow) -> None:
         cursor.execute(query)
         results = cursor.fetchall()
 
-        # Formatting the output as a JSON-like log
-        response_data = []
+        # Formatting the output for logging
         for row in results:
-            sensor_info = {
-                "Sensor ID": row[0],
-                "Temperature": {
-                    "Min": row[1],
-                    "Max": row[2],
-                    "Avg": round(row[3], 2)
-                },
-                "Wind Speed": {
-                    "Min": row[4],
-                    "Max": row[5],
-                    "Avg": round(row[6], 2)
-                },
-                "Humidity": {
-                    "Min": row[7],
-                    "Max": row[8],
-                    "Avg": round(row[9], 2)
-                },
-                "CO2 Level": {
-                    "Min": row[10],
-                    "Max": row[11],
-                    "Avg": round(row[12], 2)
-                }
-            }
-            response_data.append(sensor_info)
+            logging.info(
+                f"Sensor ID: {row[0]}, "
+                f"Temperature - Min: {row[1]}, Max: {row[2]}, Avg: {round(row[3], 2)}, "
+                f"Wind Speed - Min: {row[4]}, Max: {row[5]}, Avg: {round(row[6], 2)}, "
+                f"Humidity - Min: {row[7]}, Max: {row[8]}, Avg: {round(row[9], 2)}, "
+                f"CO2 Level - Min: {row[10]}, Max: {row[11]}, Avg: {round(row[12], 2)}"
+            )
 
-        logging.info("Sensor data statistics have been successfully retrieved.")
-        logging.info(json.dumps(response_data, ensure_ascii=False, indent=2))
+        logging.info("Sensor data statistics have been successfully retrieved and logged.")
 
     except pymssql.OperationalError as e:
         logging.error(f"Database connection failed: {e}")
