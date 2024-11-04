@@ -25,6 +25,19 @@ local.settings.json
 node_modules
 dist
 
+# vscode setting
+.vscode/
+
+# macOS specific files
+.DS_Store
+
+# Python specific files and directories
+.mypy_cache/
+.pytest_cache/
+.envrc
+.env.local
+.python_packages/
+
 # Local python packages
 .python_packages/
 
