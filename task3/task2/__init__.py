@@ -40,13 +40,12 @@ def main(input: str) -> None:
         results = cursor.fetchall()
 
         for row in results:
-            logging.info(
-                f"Sensor ID: {row[0]}, "
-                f"Temperature - Min: {row[1]}, Max: {row[2]}, Avg: {round(row[3], 2)}, "
-                f"Wind Speed - Min: {row[4]}, Max: {row[5]}, Avg: {round(row[6], 2)}, "
-                f"Humidity - Min: {row[7]}, Max: {row[8]}, Avg: {round(row[9], 2)}, "
-                f"CO2 Level - Min: {row[10]}, Max: {row[11]}, Avg: {round(row[12], 2)}"
-            )
+            logging.info(f"Sensor ID: {row[0]}")
+            logging.info(f"  Temperature - Min: {row[1]}, Max: {row[2]}, Avg: {row[3]:.2f}")
+            logging.info(f"  Wind Speed  - Min: {row[4]}, Max: {row[5]}, Avg: {row[6]:.2f}")
+            logging.info(f"  Humidity    - Min: {row[7]}, Max: {row[8]}, Avg: {row[9]:.2f}")
+            logging.info(f"  CO2 Level   - Min: {row[10]}, Max: {row[11]}, Avg: {row[12]:.2f}")
+            logging.info("-" * 30)
 
         logging.info(
             "Sensor data statistics have been successfully retrieved and logged.")
