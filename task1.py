@@ -95,8 +95,8 @@ def visualize_data(cursor):
     plt.grid(True)
 
     plt.tight_layout()
-    plt.savefig('/tmp/chart.png')
-    print("Chart has been saved as /tmp/chart.png")
+    plt.show()
+    print("Chart has been displayed.")
 
 
 def main():
