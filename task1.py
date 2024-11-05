@@ -1,4 +1,3 @@
-import time
 import pymssql
 import random
 import datetime

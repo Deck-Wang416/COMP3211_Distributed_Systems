@@ -1,11 +1,11 @@
 import pymssql
-from datetime import datetime
 
 # Database connection configuration
 server = 'deck-server.database.windows.net'
 user = 'deck_wang'
 password = '20030416Wyf.'
 database = 'distributed_systems_deck'
+
 
 def connect_to_database():
     """Connect to the Azure SQL Database."""
@@ -17,6 +17,7 @@ def connect_to_database():
     except pymssql.OperationalError as e:
         print(f"Failed to connect to the database: {e}")
         return None, None
+
 
 def calculate_statistics(cursor):
     """Calculate the minimum, maximum, and average for each sensor."""
@@ -50,6 +51,7 @@ def calculate_statistics(cursor):
         print(f"  CO2 Level   - Min: {row[10]}, Max: {row[11]}, Avg: {row[12]:.2f}")
         print("-" * 30)
 
+
 def main():
     """Main program: Calculate sensor data statistics and output to the command line."""
     conn, cursor = connect_to_database()
@@ -57,6 +59,7 @@ def main():
         calculate_statistics(cursor)
         conn.close()
         print("Database connection has been closed.")
+
 
 if __name__ == "__main__":
     main()
