@@ -1,22 +1,25 @@
 import pymssql
 from datetime import datetime
-# 数据库连接配置
+
+# Database connection configuration
 server = 'deck-server.database.windows.net'
 user = 'deck_wang'
 password = '20030416Wyf.'
 database = 'distributed_systems_deck'
+
 def connect_to_database():
-    """连接到 Azure SQL 数据库。"""
+    """Connect to the Azure SQL Database."""
     try:
         conn = pymssql.connect(server=server, user=user, password=password, database=database)
         cursor = conn.cursor()
-        print("成功连接到数据库！")
+        print("Successfully connected to the database!")
         return conn, cursor
     except pymssql.OperationalError as e:
-        print(f"数据库连接失败: {e}")
+        print(f"Failed to connect to the database: {e}")
         return None, None
-def calculate_statistics(conn, cursor):
-    """计算每个传感器的最大值、最小值和平均值。"""
+
+def calculate_statistics(cursor):
+    """Calculate the minimum, maximum, and average for each sensor."""
     query = """
     SELECT 
         sensor_id, 
@@ -33,11 +36,12 @@ def calculate_statistics(conn, cursor):
         MAX(co2_level) AS max_co2,
         AVG(co2_level) AS avg_co2
     FROM sensor_data
-    GROUP BY sensor_id;
+    GROUP BY sensor_id
+    ORDER BY sensor_id;
     """
     cursor.execute(query)
     results = cursor.fetchall()
-    print("传感器数据统计：")
+    print("Sensor Data Statistics:")
     for row in results:
         print(f"Sensor ID: {row[0]}")
         print(f"  Temperature - Min: {row[1]}, Max: {row[2]}, Avg: {row[3]:.2f}")
@@ -45,17 +49,14 @@ def calculate_statistics(conn, cursor):
         print(f"  Humidity    - Min: {row[7]}, Max: {row[8]}, Avg: {row[9]:.2f}")
         print(f"  CO2 Level   - Min: {row[10]}, Max: {row[11]}, Avg: {row[12]:.2f}")
         print("-" * 30)
-    # 插入验证记录到 trigger_log 表
-    insert_log_query = "INSERT INTO trigger_log (timestamp, status) VALUES (%s, %s)"
-    cursor.execute(insert_log_query, (datetime.now(), 'Task 2 Triggered'))
-    conn.commit()
-    print("验证日志已插入到 trigger_log 表。")
+
 def main():
-    """主程序：计算传感器数据的统计信息并记录验证日志。"""
+    """Main program: Calculate sensor data statistics and output to the command line."""
     conn, cursor = connect_to_database()
     if conn and cursor:
-        calculate_statistics(conn, cursor)
+        calculate_statistics(cursor)
         conn.close()
-        print("数据库连接已关闭。")
+        print("Database connection has been closed.")
+
 if __name__ == "__main__":
     main()

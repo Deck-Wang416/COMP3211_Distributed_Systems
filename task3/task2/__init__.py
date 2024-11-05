@@ -34,7 +34,8 @@ def main(input: str) -> None:
             MAX(co2_level) AS max_co2,
             AVG(co2_level) AS avg_co2
         FROM sensor_data
-        GROUP BY sensor_id;
+        GROUP BY sensor_id
+        ORDER BY sensor_id;
         """
         cursor.execute(query)
         results = cursor.fetchall()
