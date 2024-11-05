@@ -4,10 +4,6 @@
 
 ## Overview
 
-This README provides a detailed overview of the implementation for the COMP3211 Distributed Systems coursework. The project showcases the design and deployment of a serverless distributed system using Microsoft Azure to simulate an IoT network for environmental data collection and analysis.
-
-### Module: Distributed Systems (XJCO3211)
-
 The project involves creating and deploying a system that uses serverless functions in Microsoft Azure. The solution consists of three primary tasks that demonstrate the use of serverless architecture to collect, process, and automate data management for an IoT network.
 
 ## Tasks
@@ -40,13 +36,7 @@ The project involves creating and deploying a system that uses serverless functi
 ### Services Used:
 - **Azure SQL Server**: `deck-server.database.windows.net`
 - **Azure SQL Database**: `distributed_systems_deck`
-- **Azure Functions**:
-  - **Task 1**:
-    - Local HTTP Trigger (`task1`)
-    - Timer Trigger for scheduled data collection (`task3/task1`)
-  - **Task 2**:
-    - Local HTTP Trigger (`task2`)
-    - SQL Trigger for data processing (`task3/task2`)
+- **Azure Functions**: Included HTTP, Timer and SQL trigger functions.
 - **Application Insights**: Used to monitor and log the performance of the functions.
 
 ## Folder Structure
@@ -54,23 +44,22 @@ The project involves creating and deploying a system that uses serverless functi
 ```plaintext
 COMP3211_Distributed_Systems/
 │
-├── task1/               # Folder for Task 1 HTTP Trigger Function
-│   ├── host.json        # Configuration for Azure Function
-│   ├── local.settings.json # Local configuration file (excluded from Git)
-│   ├── task1/           # Subfolder containing task1 HTTP function and function.json
-│
-├── task2/               # Folder for Task 2 HTTP Trigger Function
+├── task1/               # Folder for local Task1
 │   ├── host.json
 │   ├── local.settings.json
-│   ├── task2/           # Subfolder containing task2 HTTP function and function.json
+│   ├── task1/           # HTTP Trigger Function
 │
-└── task3/               # Folder for Azure-deployed Task 1 and Task 2 functions
-    ├── host.json
-    ├── task1/           # Timer Trigger Function for task3
-    ├── task2/           # SQL Trigger Function for task3
+├── task2/               # Folder for local Task2
+│   ├── host.json
+│   ├── local.settings.json
+│   ├── task2/           # HTTP Trigger Function
+│
+└── task3/               # Folder for Azure-deployed Task3 function application
+    ├── host.json── 
+    ├── local.settings.json # Local configuration (excluded from Git)
+    ├── task1/           # Timer Trigger Function
+    ├── task2/           # SQL Trigger Function
 ```
 
-## Authors
-**Wang Yufei**
-
-This project demonstrates the integration of serverless functions in Azure to build a distributed system capable of scalable data collection and analysis.
+## Author
+**Yufei Wang**
