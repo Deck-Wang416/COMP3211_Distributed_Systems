@@ -9,7 +9,7 @@ database = 'distributed_systems_deck'
 
 
 def main(input: str) -> None:
-    logging.info(f"Received data: {input}")
+    logging.info("Received new data change notification.")
     try:
         # Connect to Azure SQL Database
         conn = pymssql.connect(server=server, user=user,
