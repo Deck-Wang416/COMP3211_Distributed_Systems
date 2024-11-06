@@ -12,7 +12,8 @@ database = 'distributed_systems_deck'
 def connect_to_database():
     """Connect to the Azure SQL Database."""
     try:
-        conn = pymssql.connect(server=server, user=user, password=password, database=database)
+        conn = pymssql.connect(server=server, user=user,
+                               password=password, database=database)
         cursor = conn.cursor()
         logging.info("Successfully connected to the database!")
         return conn, cursor
