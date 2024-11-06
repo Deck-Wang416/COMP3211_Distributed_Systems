@@ -2,6 +2,8 @@ import logging
 import pymssql
 import random
 import datetime
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from time import time
 from azure.functions import HttpRequest, HttpResponse
@@ -78,8 +80,8 @@ def visualize_performance():
     plt.title("Database Insert Time per Run")
     plt.legend()
     plt.grid(True)
-    plt.show()
-    logging.info("Performance chart displayed.")
+    plt.savefig("/tmp/performance_chart.png")
+    logging.info("Performance chart saved as /tmp/performance_chart.png.")
 
 def main(req: HttpRequest) -> HttpResponse:
     """HTTP trigger to run multiple data insertions and generate performance graph."""
