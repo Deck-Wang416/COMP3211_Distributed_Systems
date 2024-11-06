@@ -15,7 +15,7 @@ password = '20030416Wyf.'
 database = 'distributed_systems_deck'
 
 # Number of runs for performance testing
-num_runs = 10
+num_runs = 5
 insert_time_records = []
 
 def connect_to_database():
@@ -80,7 +80,7 @@ def visualize_performance():
     plt.title("Database Insert Time per Run")
     plt.legend()
     plt.grid(True)
-    plt.savefig("/Users/wang/Desktop/performance_chart.pn")
+    plt.savefig("/Users/wang/Desktop/performance_chart.png")
     logging.info("Performance chart saved successfully.")
 
 def main(req: HttpRequest) -> HttpResponse:
