@@ -75,13 +75,13 @@ def visualize_performance():
     plt.plot(run_ids, insert_time_records, marker='o', label="Insert Time per Run (s)")
     plt.axhline(y=average_time, color='r', linestyle='--', label=f"Average Insert Time = {average_time:.4f} s")
     
-    plt.xlabel("Run Number")
+    plt.xlabel("Workload (Run Number)")
     plt.ylabel("Insert Time (s)")
     plt.title("Database Insert Time per Run")
     plt.legend()
     plt.grid(True)
-    plt.savefig("/tmp/performance_chart.png")
-    logging.info("Performance chart saved as /tmp/performance_chart.png.")
+    plt.savefig("/Users/wang/Desktop/performance_chart.pn")
+    logging.info("Performance chart saved successfully.")
 
 def main(req: HttpRequest) -> HttpResponse:
     """HTTP trigger to run multiple data insertions and generate performance graph."""
