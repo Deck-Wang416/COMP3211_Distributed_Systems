@@ -30,17 +30,17 @@ The project involves creating and deploying a system that uses serverless functi
 ```plaintext
 COMP3211_Distributed_Systems/
 │
-├── task1/               # Folder for local Task1
+├── task1/               # Folder for Azure-deployed Task1
 │   ├── host.json
 │   ├── local.settings.json
 │   ├── task1/           # HTTP Trigger Function
 │
-├── task2/               # Folder for local Task2
+├── task2/               # Folder for Azure-deployed Task2
 │   ├── host.json
 │   ├── local.settings.json
 │   ├── task2/           # HTTP Trigger Function
 │
-└── task3/               # Folder for Azure-deployed Task3 function application
+└── task3/               # Folder for Azure-deployed Task3
     ├── host.json── 
     ├── local.settings.json # Local configuration (excluded from Git)
     ├── task1/           # Timer Trigger Function
