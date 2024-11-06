@@ -3,6 +3,7 @@ import pymssql
 import random
 import datetime
 import matplotlib.pyplot as plt
+from time import time
 from azure.functions import HttpRequest, HttpResponse
 
 # Database connection configuration
@@ -11,6 +12,9 @@ user = 'deck_wang'
 password = '20030416Wyf.'
 database = 'distributed_systems_deck'
 
+# Number of runs for performance testing
+num_runs = 10
+insert_time_records = []
 
 def connect_to_database():
     """Connect to the Azure SQL database."""
@@ -22,7 +26,6 @@ def connect_to_database():
     except pymssql.OperationalError as e:
         logging.error(f"Failed to connect to the database: {e}")
         return None, None
-
 
 def create_table(cursor):
     """Create table if it does not exist."""
@@ -40,9 +43,9 @@ def create_table(cursor):
     """)
     logging.info("Table is ready.")
 
-
 def generate_sensor_data(cursor):
-    """Generate and insert simulated sensor data."""
+    """Generate and insert simulated sensor data, tracking insert time."""
+    start_time = time()
     for i in range(20):
         sensor_id = i + 1
         temperature = round(random.uniform(8, 15), 2)
@@ -55,57 +58,45 @@ def generate_sensor_data(cursor):
             "VALUES (%s, %s, %s, %s, %s, %s)",
             (sensor_id, temperature, wind_speed, humidity, co2_level, timestamp)
         )
-    logging.info("Sensor data has been successfully inserted.")
+    end_time = time()
+    insert_time = end_time - start_time
+    insert_time_records.append(insert_time)
+    logging.info(f"Inserted 20 sensor data records in {insert_time:.4f} seconds.")
 
-
-def visualize_data(cursor):
-    """Query data and generate a chart."""
-    cursor.execute("SELECT sensor_id, temperature, wind_speed, humidity, co2_level FROM sensor_data")
-    data = cursor.fetchall()
-
-    sensor_ids = [row[0] for row in data]
-    temperatures = [row[1] for row in data]
-    wind_speeds = [row[2] for row in data]
-    humidities = [row[3] for row in data]
-    co2_levels = [row[4] for row in data]
-
-    plt.figure(figsize=(10, 5))
-
-    plt.subplot(1, 2, 1)
-    plt.plot(sensor_ids, temperatures, marker='o', label='Temperature (°C)', color='r')
-    plt.plot(sensor_ids, humidities, marker='x', label='Humidity (%)', color='b')
-    plt.xlabel('Sensor ID')
-    plt.ylabel('Value')
-    plt.title('Temperature and Humidity')
+def visualize_performance():
+    """Plot the performance graph for average insert times."""
+    # Calculate average insert time for each run
+    run_ids = list(range(1, num_runs + 1))
+    average_time = sum(insert_time_records) / len(insert_time_records)
+    
+    plt.figure(figsize=(8, 6))
+    plt.plot(run_ids, insert_time_records, marker='o', label="Insert Time per Run (s)")
+    plt.axhline(y=average_time, color='r', linestyle='--', label=f"Average Insert Time = {average_time:.4f} s")
+    
+    plt.xlabel("Run Number")
+    plt.ylabel("Insert Time (s)")
+    plt.title("Database Insert Time per Run")
     plt.legend()
     plt.grid(True)
-
-    plt.subplot(1, 2, 2)
-    plt.plot(sensor_ids, wind_speeds, marker='s', label='Wind Speed (mph)', color='g')
-    plt.plot(sensor_ids, co2_levels, marker='d', label='CO2 Level (ppm)', color='m')
-    plt.xlabel('Sensor ID')
-    plt.ylabel('Value')
-    plt.title('Wind Speed and CO2 Level')
-    plt.legend()
-    plt.grid(True)
-
-    plt.tight_layout()
     plt.show()
-    logging.info("Chart has been displayed.")
-
+    logging.info("Performance chart displayed.")
 
 def main(req: HttpRequest) -> HttpResponse:
-    """HTTP trigger to collect data once and generate the chart."""
+    """HTTP trigger to run multiple data insertions and generate performance graph."""
     logging.info('Python HTTP trigger function processed a request.')
 
     conn, cursor = connect_to_database()
     if conn and cursor:
         create_table(cursor)
-        generate_sensor_data(cursor)
-        conn.commit()
-        visualize_data(cursor)
+        
+        for _ in range(num_runs):
+            generate_sensor_data(cursor)
+            conn.commit()
+        
+        visualize_performance()
         conn.close()
         logging.info("Database connection closed.")
-        return HttpResponse("Task1 executed successfully.", status_code=200)
+        
+        return HttpResponse("Task1 executed successfully with performance analysis.", status_code=200)
     else:
         return HttpResponse("Failed to connect to the database.", status_code=500)
