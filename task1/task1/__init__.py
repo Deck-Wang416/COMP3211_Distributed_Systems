@@ -2,10 +2,6 @@ import logging
 import pymssql
 import random
 import datetime
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-from time import time
 from azure.functions import HttpRequest, HttpResponse
 
 # Database connection configuration
@@ -14,20 +10,19 @@ user = 'deck_wang'
 password = '20030416Wyf.'
 database = 'distributed_systems_deck'
 
-# Workloads (number of records to insert in each run)
-workloads = [20, 40, 60, 80, 100]
-insert_time_records = []
 
 def connect_to_database():
     """Connect to the Azure SQL database."""
     try:
-        conn = pymssql.connect(server=server, user=user, password=password, database=database)
+        conn = pymssql.connect(server=server, user=user,
+                               password=password, database=database)
         cursor = conn.cursor()
         logging.info("Successfully connected to the database!")
         return conn, cursor
     except pymssql.OperationalError as e:
         logging.error(f"Failed to connect to the database: {e}")
         return None, None
+
 
 def create_table(cursor):
     """Create table if it does not exist."""
@@ -45,11 +40,11 @@ def create_table(cursor):
     """)
     logging.info("Table is ready.")
 
-def generate_sensor_data(cursor, num_records):
-    """Generate and insert a specified number of simulated sensor data records, tracking insert time."""
-    start_time = time()
-    for i in range(num_records):
-        sensor_id = (i % 20) + 1
+
+def generate_sensor_data(cursor):
+    """Generate and insert simulated sensor data."""
+    for i in range(20):
+        sensor_id = i + 1
         temperature = round(random.uniform(8, 15), 2)
         wind_speed = round(random.uniform(15, 25), 2)
         humidity = round(random.uniform(40, 70), 2)
@@ -60,43 +55,20 @@ def generate_sensor_data(cursor, num_records):
             "VALUES (%s, %s, %s, %s, %s, %s)",
             (sensor_id, temperature, wind_speed, humidity, co2_level, timestamp)
         )
-    end_time = time()
-    insert_time = end_time - start_time
-    insert_time_records.append(insert_time)
-    logging.info(f"Inserted {num_records} sensor data records in {insert_time:.4f} seconds.")
+    logging.info("Sensor data has been successfully inserted.")
 
-def visualize_performance():
-    """Plot the performance graph for varying workloads."""
-    average_time = sum(insert_time_records) / len(insert_time_records)
-    
-    plt.figure(figsize=(8, 6))
-    plt.plot(workloads, insert_time_records, marker='o', label="Insert Time (s) for Workload")
-    plt.axhline(y=average_time, color='r', linestyle='--', label=f"Average Insert Time = {average_time:.4f} s")
-    
-    plt.xlabel("Workload (Number of Records Inserted)")
-    plt.ylabel("Insert Time (s)")
-    plt.title("Database Insert Time vs Workload Size")
-    plt.legend()
-    plt.grid(True)
-    plt.savefig("/Users/wang/Desktop/performance_chart.png")
-    logging.info("Performance chart saved successfully.")
 
 def main(req: HttpRequest) -> HttpResponse:
-    """HTTP trigger to run multiple data insertions and generate performance graph."""
+    """HTTP trigger to collect data once and generate the chart."""
     logging.info('Python HTTP trigger function processed a request.')
 
     conn, cursor = connect_to_database()
     if conn and cursor:
         create_table(cursor)
-        
-        for workload in workloads:
-            generate_sensor_data(cursor, workload)
-            conn.commit()
-        
-        visualize_performance()
+        generate_sensor_data(cursor)
+        conn.commit()
         conn.close()
         logging.info("Database connection closed.")
-        
-        return HttpResponse("Task1 executed successfully with performance analysis.", status_code=200)
+        return HttpResponse("Task1 executed successfully.", status_code=200)
     else:
         return HttpResponse("Failed to connect to the database.", status_code=500)
