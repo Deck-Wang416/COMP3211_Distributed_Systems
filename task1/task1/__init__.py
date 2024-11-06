@@ -14,8 +14,8 @@ user = 'deck_wang'
 password = '20030416Wyf.'
 database = 'distributed_systems_deck'
 
-# Number of runs for performance testing
-num_runs = 5
+# Workloads (number of records to insert in each run)
+workloads = [20, 40, 60, 80, 100]
 insert_time_records = []
 
 def connect_to_database():
@@ -45,11 +45,11 @@ def create_table(cursor):
     """)
     logging.info("Table is ready.")
 
-def generate_sensor_data(cursor):
-    """Generate and insert simulated sensor data, tracking insert time."""
+def generate_sensor_data(cursor, num_records):
+    """Generate and insert a specified number of simulated sensor data records, tracking insert time."""
     start_time = time()
-    for i in range(20):
-        sensor_id = i + 1
+    for i in range(num_records):
+        sensor_id = (i % 20) + 1
         temperature = round(random.uniform(8, 15), 2)
         wind_speed = round(random.uniform(15, 25), 2)
         humidity = round(random.uniform(40, 70), 2)
@@ -63,21 +63,19 @@ def generate_sensor_data(cursor):
     end_time = time()
     insert_time = end_time - start_time
     insert_time_records.append(insert_time)
-    logging.info(f"Inserted 20 sensor data records in {insert_time:.4f} seconds.")
+    logging.info(f"Inserted {num_records} sensor data records in {insert_time:.4f} seconds.")
 
 def visualize_performance():
-    """Plot the performance graph for average insert times."""
-    # Calculate average insert time for each run
-    run_ids = list(range(1, num_runs + 1))
+    """Plot the performance graph for varying workloads."""
     average_time = sum(insert_time_records) / len(insert_time_records)
     
     plt.figure(figsize=(8, 6))
-    plt.plot(run_ids, insert_time_records, marker='o', label="Insert Time per Run (s)")
+    plt.plot(workloads, insert_time_records, marker='o', label="Insert Time (s) for Workload")
     plt.axhline(y=average_time, color='r', linestyle='--', label=f"Average Insert Time = {average_time:.4f} s")
     
-    plt.xlabel("Workload (Run Number)")
+    plt.xlabel("Workload (Number of Records Inserted)")
     plt.ylabel("Insert Time (s)")
-    plt.title("Database Insert Time per Run")
+    plt.title("Database Insert Time vs Workload Size")
     plt.legend()
     plt.grid(True)
     plt.savefig("/Users/wang/Desktop/performance_chart.png")
@@ -91,8 +89,8 @@ def main(req: HttpRequest) -> HttpResponse:
     if conn and cursor:
         create_table(cursor)
         
-        for _ in range(num_runs):
-            generate_sensor_data(cursor)
+        for workload in workloads:
+            generate_sensor_data(cursor, workload)
             conn.commit()
         
         visualize_performance()
